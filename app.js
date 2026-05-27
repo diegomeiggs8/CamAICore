@@ -111,7 +111,7 @@ function happinessScore(mesh) {
     const avgEAR = (earL + earR) / 2;
     const squintScore = Math.min(100, Math.max(0, ((0.30 - avgEAR) / 0.15) * 100));
     const mouthOpenPct = marToPct(mar(mesh));
-    if (mouthOpenPct < 20) return 0;
+    if (mouthOpenPct < 16) return 0;
     const mouthHappyScore = Math.min(100, Math.max(0, 100 - Math.abs(mouthOpenPct - 20) * 5));
     return Math.min(100, (smileScore * 0.35 + liftScore * 0.25 + squintScore * 0.25 + mouthHappyScore * 0.15) * 1.2);
 }

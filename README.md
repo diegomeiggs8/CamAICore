@@ -1,132 +1,68 @@
 # CamAI
 
-> Detección en tiempo real de objetos, armas y emociones faciales usando TensorFlow.js. 100% client-side, no requiere servidor ni backend.
+Una aplicación que usa la cámara de tu computadora para detectar **armas** y **sonrisas** en tiempo real.
 
 ---
 
 ## 🚨 Modo Crimen
 
-Detección de armas mediante **MobileNet** (60+ keywords: revolver, rifle, knife, etc.) combinado con **COCO-SSD** para detectar personas.
+Detecta personas armadas. Cuando encuentra a alguien con un arma:
 
-| Indicador | Qué hace |
-|-----------|----------|
-| ⚠️ **SOSPECHOSO** | 2 detecciones de arma+persona → indicador amarillo sin sonido |
-| 🚨 **ALARMA** | 3 detecciones en 15s → sirena 880/660Hz + pulso rojo |
-| 🔇 Auto-stop | 20s sin detección desactiva la alarma |
-
-```
-📷 Cámara  [🚨 Crimen | 😊 Felicidad]  🚨 INACTIVO
-┌──────────────────────────────────────────────┐
-│  ⚠️ SOSPECHOSO                               │
-│                                              │
-│     [persona + revolver detectados]          │
-│                                              │
-├──────────────────────────────────────────────┤
-│ Objetos:                         Facial:     │
-│  ⚠️ ARMA: revolver 87%          👁 68%      │
-│  persona 95%                     👁 62%      │
-│  cell phone 42%                  👄 22%      │
-│                                  😊 5%       │
-└──────────────────────────────────────────────┘
-```
+- **⚠️ Sospechoso** — aparecerá un aviso amarillo si hay señales de alerta
+- **🚨 Alarma** — sonará una sirena si confirma el peligro
+- Se apaga sola a los 20 segundos si ya no hay peligro
 
 ## 😊 Modo Felicidad
 
-Detección de sonrisa genuina usando 4 métricas de **Facemesh** (468 puntos faciales):
+Detecta cuando una persona está sonriendo de verdad. Usa estos indicadores:
 
-| Métrica | Peso | Qué mide |
-|---------|------|----------|
-| 😁 Anchura de sonrisa | 35% | Boca más ancha vs distancia ocular |
-| ⬆️ Elevación de comisuras | 25% | Comisuras suben respecto al labio superior |
-| 👀 Squint ocular | 25% | Ojos se achican (sonrisa Duchenne) |
-| 👄 Apertura bucal | 15% | Boca ligeramente abierta (~20%) |
+- 😁 **Qué tan ancha es la sonrisa**
+- ⬆️ **Si las comisuras de la boca suben**
+- 👀 **Si los ojos se achican** (sonrisa genuina)
+- 👄 **Si la boca está ligeramente abierta**
 
-**Alarma:** 4 detecciones en 2s con gaps ≤0.5s → melodía ascendente (C5→E5→G5→C6) + pulso dorado. Auto-stop tras 6s.
-
-```
-📷 Cámara  [🚨 Crimen | 😊 Felicidad]  🚨 INACTIVO
-┌──────────────────────────────────────────────┐
-│                                              │
-│     [persona sonriendo 👤😊]                 │
-│                                              │
-├──────────────────────────────────────────────┤
-│ Objetos:                         Facial:     │
-│  persona 95%                     👁 53%      │
-│  cell phone 42%                  👄 22%      │
-│                                  😊 85%      │
-└──────────────────────────────────────────────┘
-```
+Cuando alguien sonríe por varios segundos seguidos, suena una **melodía alegre**.
 
 ## 👤 Análisis Facial
 
-| Indicador | Rango | Descripción |
-|-----------|-------|-------------|
-| 👁 Ojo izquierdo | 0–100% | EAR (Eye Aspect Ratio) normalizado |
-| 👁 Ojo derecho | 0–100% | EAR normalizado |
-| 👄 Boca abierta | 0–100% | MAR (Mouth Aspect Ratio) normalizado |
-| 😊 Felicidad | 0–100% | Score combinado (4 métricas) |
+Muestra en pantalla:
+- Qué tan abiertos están los ojos izquierdo y derecho
+- Qué tan abierta está la boca
+- Un porcentaje de **felicidad** de 0 a 100%
 
-Overlay en canvas con 468 landmarks faciales + contornos de ojos y boca.
+## 📷 Cómo se usa
 
-## 📷 Fuentes de Video
+1. Abre la aplicación en tu navegador (Chrome o Edge)
+2. La cámara se enciende sola
+3. Puedes elegir entre modo **Crimen** o **Felicidad**
+4. También puedes **cargar un video MP4** en lugar de usar la cámara
 
-- **Cámara web** — `getUserMedia` con auto-inicio
-- **Archivo MP4** — selector de archivos con auto-retorno a cámara al terminar
+## 🎮 Controles
 
-## 🎛️ Controles
+| Botón | Qué hace |
+|-------|----------|
+| Pausar / Reanudar | Congela o reanuda la detección |
+| Cargar MP4 | Usa un video en lugar de la cámara |
+| Crimen / Felicidad | Cambia entre detectar armas o sonrisas |
+| Barra roja/dorada | Muestra si hay alarma activa |
+| Confianza mín | Regula qué tan sensible es la detección |
 
-| Control | Función |
-|---------|---------|
-| ⏸️ Pausar / ▶️ Reanudar | Congela el procesamiento |
-| 📁 Cargar MP4 | Video desde archivo |
-| 🔄 Crimen / Felicidad | Cambia modo de detección |
-| 🚨 Barra de alarma | Estado: inactivo / sospechoso / alarma |
-| 🎚️ Confianza mín | Umbral 1–90% (default 15%) |
+## 💻 Requisitos
 
-## 🖥️ Requisitos
+- Un navegador como **Chrome**, **Edge** o **Firefox**
+- **Cámara web** (no obligatoria, puedes usar un video MP4)
+- Necesitas **iniciar un servidor local** (no funciona abriendo el archivo directamente)
 
-- Navegador moderno (Chrome, Edge, Firefox)
-- Cámara web (opcional, funciona con MP4)
-- Servir via HTTP (`file://` no permite `getUserMedia`)
+## ¿Cómo lo abro?
 
-## 🚀 Uso
+Abre la terminal y escribe:
 
-```bash
-# Python
+```
 python -m http.server 8080
-
-# Node
-npx http-server .
-
-# VS Code
-# Extensión "Live Server" → click derecho en index.html
 ```
 
-Abrir `http://localhost:8080`
+Luego ve a `http://localhost:8080` en tu navegador.
 
-## 🧠 Tecnologías
+---
 
-| Librería | Versión | Propósito |
-|----------|---------|-----------|
-| TensorFlow.js | 2.8.6 | Runtime de ML |
-| COCO-SSD | 2.2.2 | Detección de objetos (90 clases) |
-| Facemesh | 0.0.5 | Landmarks faciales (468 pts) |
-| MobileNet | 2.1.0 | Clasificador ImageNet (1000 clases) |
-
-## 📁 Estructura
-
-```
-camai/
-├── index.html    # Página principal + UI
-├── style.css     # Estilos dark theme + animaciones
-├── app.js        # Lógica completa de detección
-└── README.md     # Este archivo
-```
-
-## 💡 Posibles Mejoras
-
-- [ ] Entrenar modelo custom con clases de armas específicas
-- [ ] Más emociones: sorpresa, enojo, tristeza
-- [ ] Exportar logs a CSV
-- [ ] Historial de detecciones
-- [ ] URL personalizada para modelo TF.js custom
+Hecho con TensorFlow.js, todo funciona en el navegador, sin instalar nada.

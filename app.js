@@ -113,7 +113,7 @@ function happinessScore(mesh) {
     const mouthOpenPct = marToPct(mar(mesh));
     if (mouthOpenPct < 20) return 0;
     const mouthHappyScore = Math.min(100, Math.max(0, 100 - Math.abs(mouthOpenPct - 20) * 5));
-    return smileScore * 0.35 + liftScore * 0.25 + squintScore * 0.25 + mouthHappyScore * 0.15;
+    return Math.min(100, (smileScore * 0.35 + liftScore * 0.25 + squintScore * 0.25 + mouthHappyScore * 0.15) * 1.2);
 }
 
 function setProgress(pct, msg) {

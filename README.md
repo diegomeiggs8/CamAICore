@@ -1,68 +1,52 @@
 # CamAI
 
-Una aplicación que usa la cámara de tu computadora para detectar **armas** y **sonrisas** en tiempo real.
+Sistema de inteligencia artificial para videovigilancia inteligente. Analiza video en tiempo real usando la cámara de cualquier computadora, sin necesidad de servidores ni conexión a internet.
 
 ---
 
-## 🚨 Modo Crimen
+## 🚨 Seguridad y Prevención de Riesgos
 
-Detecta personas armadas. Cuando encuentra a alguien con un arma:
+Ideal para **hoteles, bancos, oficinas, comercios, escuelas y espacios públicos**.
 
-- **⚠️ Sospechoso** — aparecerá un aviso amarillo si hay señales de alerta
-- **🚨 Alarma** — sonará una sirena si confirma el peligro
-- Se apaga sola a los 20 segundos si ya no hay peligro
+Detecta automáticamente cuando una persona porta un arma (revólver, cuchillo, rifle, etc.) y activa alertas:
 
-## 😊 Modo Felicidad
+- **Alerta temprana ⚠️** — Aviso visual ante actividad sospechosa
+- **Alarma general 🚨** — Sonido de alerta cuando se confirma el riesgo
+- Respuesta inmediata sin depender de un operador humano
 
-Detecta cuando una persona está sonriendo de verdad. Usa estos indicadores:
+## 😊 Medición de Satisfacción
 
-- 😁 **Qué tan ancha es la sonrisa**
-- ⬆️ **Si las comisuras de la boca suben**
-- 👀 **Si los ojos se achican** (sonrisa genuina)
-- 👄 **Si la boca está ligeramente abierta**
+Perfecto para **tiendas, bancos, ventanillas, atención al cliente, restaurantes y centros de servicio**.
 
-Cuando alguien sonríe por varios segundos seguidos, suena una **melodía alegre**.
+Detecta sonrisas genuinas y mide el nivel de felicidad de las personas en tiempo real:
+
+- **Porcentaje de felicidad** de cada persona (0 a 100%)
+- **Alerta de felicidad** cuando los clientes están contentos
+- Útil para medir calidad en atención al cliente, entrenar equipos de ventas, o evaluar experiencias en mostrador
 
 ## 👤 Análisis Facial
 
-Muestra en pantalla:
-- Qué tan abiertos están los ojos izquierdo y derecho
-- Qué tan abierta está la boca
-- Un porcentaje de **felicidad** de 0 a 100%
+Además, CamAI analiza expresiones faciales básicas:
 
-## 📷 Cómo se usa
+- Nivel de apertura de ojos y boca
+- Cantidad de personas detectadas
+- Indicadores en pantalla para cada rostro
 
-1. Abre la aplicación en tu navegador (Chrome o Edge)
-2. La cámara se enciende sola
-3. Puedes elegir entre modo **Crimen** o **Felicidad**
-4. También puedes **cargar un video MP4** en lugar de usar la cámara
+## 📷 Flexible
 
-## 🎮 Controles
+Funciona con:
+- Cámaras web estándar (plug and play)
+- Videos MP4 grabados (para análisis después del evento)
 
-| Botón | Qué hace |
-|-------|----------|
-| Pausar / Reanudar | Congela o reanuda la detección |
-| Cargar MP4 | Usa un video en lugar de la cámara |
-| Crimen / Felicidad | Cambia entre detectar armas o sonrisas |
-| Barra roja/dorada | Muestra si hay alarma activa |
-| Confianza mín | Regula qué tan sensible es la detección |
+## Características Principales
 
-## 💻 Requisitos
-
-- Un navegador como **Chrome**, **Edge** o **Firefox**
-- **Cámara web** (no obligatoria, puedes usar un video MP4)
-- Necesitas **iniciar un servidor local** (no funciona abriendo el archivo directamente)
-
-## ¿Cómo lo abro?
-
-Abre la terminal y escribe:
-
-```
-python -m http.server 8080
-```
-
-Luego ve a `http://localhost:8080` en tu navegador.
+- ✅ 100% en el navegador — no instalar nada
+- ✅ Sin conexión a internet requerida
+- ✅ Sin servidores ni bases de datos
+- ✅ Privacidad total: el video nunca sale del equipo
+- ✅ Interfaz oscura profesional
+- ✅ Dos modos de operación intercambiables
 
 ---
 
-Hecho con TensorFlow.js, todo funciona en el navegador, sin instalar nada.
+**CamAI** — Vigilancia inteligente al alcance de cualquier negocio.

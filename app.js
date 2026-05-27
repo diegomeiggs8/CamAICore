@@ -17,8 +17,6 @@ const modeBtns = document.querySelectorAll('.mode-btn');
 const toggleBtn = document.getElementById('toggle-btn');
 
 let objectModel = null;
-let extraModel = null;
-let extraModelLabels = [];
 let weaponModel = null;
 let faceModel = null;
 let isRunning = false;
@@ -47,6 +45,7 @@ let alarmOsc = null;
 let alarmGain = null;
 let alarmStopTimer = null;
 let lastAlarmPersonTime = 0;
+let suspiciousTimer = null;
 let detectionMode = 'crime';
 let happinessHistory = [];
 
@@ -117,47 +116,28 @@ function happinessScore(mesh) {
     return smileScore * 0.35 + liftScore * 0.25 + squintScore * 0.25 + mouthHappyScore * 0.15;
 }
 
+function setProgress(pct, msg) {
+    document.getElementById('progress-bar').style.width = pct + '%';
+    statusEl.textContent = msg;
+}
+
 async function init() {
-    statusEl.textContent = 'Cargando TensorFlow.js...';
+    setProgress(5, '5%');
     await tf.ready();
-    statusEl.textContent = 'Cargando modelo de objetos (COCO-SSD)...';
-
+    setProgress(15, '15%');
     objectModel = await cocoSsd.load();
-    statusEl.textContent = 'Cargando modelo facial (Facemesh)...';
-
+    setProgress(45, '45%');
     faceModel = await facemesh.load({ maxFaces: 3 });
-
-    statusEl.textContent = 'Cargando clasificador de armas (MobileNet)...';
+    setProgress(70, '70%');
     weaponModel = await mobilenet.load();
-    console.log(`  MobileNet: OK (1000 clases de ImageNet, detecta armas)`);
-
+    setProgress(90, '90%');
     console.log('%c✅ Modelos cargados correctamente', 'color:#00ff88;font-weight:bold');
     console.log(`  COCO-SSD: ${objectModel ? 'OK' : 'FAIL'}`);
     console.log(`  Facemesh: ${faceModel ? 'OK' : 'FAIL'}`);
     console.log(`  MobileNet: ${weaponModel ? 'OK' : 'FAIL'}`);
 
-    try {
-        statusEl.textContent = 'Cargando modelo extra (OpenImages)...';
-        const raw = await fetch('https://raw.githubusercontent.com/tensorflow/models/master/research/object_detection/data/oid_v4_label_map.pbtxt');
-        const pbtxt = await raw.text();
-        extraModelLabels = parseLabelMap(pbtxt);
-        console.log(`  OpenImages labels: ${extraModelLabels.length} clases cargadas`);
-
-        extraModel = await tf.loadGraphModel(
-            'https://tfhub.dev/google/tfjs-model/openimages_v4/ssd/mobilenet_v2/1/default/1',
-            { fromTFHub: true }
-        );
-        console.log('%c✅ OpenImages SSD cargado desde TF Hub', 'color:#00ff88');
-    } catch (e) {
-        console.warn('%c⚠️  Modelo extra no disponible: ' + e.message, 'color:#ffaa00');
-        console.log('%c💡 Para detectar armas se necesita un modelo con esas clases. Alternativas:', 'color:#88ccff');
-        console.log('  1. Entrenar modelo custom con TensorFlow.js');
-        console.log('  2. Usar un modelo server-side (API)');
-        console.log('  3. Probar otro modelo TF.js desde TF Hub editando la URL en app.js');
-        extraModel = null;
-    }
-
     startCamera();
+    setProgress(100, '100%');
 }
 
 async function detectLoop() {
@@ -178,16 +158,6 @@ async function detectLoop() {
     animFrameId = requestAnimationFrame(detectLoop);
 }
 
-function parseLabelMap(pbtxt) {
-    const labels = [];
-    const regex = /item\s*\{[^}]*?id:\s*(\d+)[^}]*?display_name:\s*"([^"]+)"/g;
-    let match;
-    while ((match = regex.exec(pbtxt)) !== null) {
-        labels[parseInt(match[1])] = match[2];
-    }
-    return labels;
-}
-
 async function detectFrame() {
     let objects = [], faces = [];
     try {
@@ -197,34 +167,6 @@ async function detectFrame() {
         ]);
     } catch (err) {
         console.warn('Error en detección:', err);
-    }
-
-    if (extraModel) {
-        try {
-            const tensor = tf.browser.fromPixels(video).expandDims(0).toFloat();
-            const input = tf.image.resizeBilinear(tensor, [320, 320]);
-            const output = await extraModel.executeAsync(input);
-            const [boxes, scores, classes, num] = output;
-            const n = (await num.data())[0];
-            const s = await scores.data();
-            const c = await classes.data();
-            const b = await boxes.data();
-            for (let i = 0; i < n && i < 20; i++) {
-                if (s[i] < confThreshold) continue;
-                const label = extraModelLabels[c[i]] || 'class_' + c[i];
-                const [ymin, xmin, ymax, xmax] = [b[i*4], b[i*4+1], b[i*4+2], b[i*4+3]];
-                objects.push({
-                    class: label,
-                    score: s[i],
-                    bbox: [xmin * canvas.width, ymin * canvas.height, (xmax - xmin) * canvas.width, (ymax - ymin) * canvas.height]
-                });
-            }
-            tensor.dispose();
-            input.dispose();
-            output.forEach(t => t.dispose());
-        } catch (e) {
-            console.warn('Error en modelo extra:', e);
-        }
     }
 
     if (detectionMode === 'crime' && weaponModel && frameSkip % 5 === 0) {
@@ -540,6 +482,7 @@ function stopAlarm() {
     document.getElementById('alarm-bar').classList.remove('active');
     document.getElementById('alarm-bar').classList.remove('happy');
     document.getElementById('alarm-bar').textContent = '🚨 INACTIVO';
+    hideSuspicious();
 
     if (alarmOsc) {
         clearInterval(alarmOsc._pulseInterval);
@@ -553,6 +496,21 @@ function stopAlarm() {
     console.log('%c✅ ALARMA DESACTIVADA', 'color:#00ff88;font-weight:bold');
 }
 
+function showSuspicious() {
+    const el = document.getElementById('suspicious-indicator');
+    if (!el) return;
+    el.classList.remove('hidden');
+    if (suspiciousTimer) clearTimeout(suspiciousTimer);
+    suspiciousTimer = setTimeout(() => el.classList.add('hidden'), 15000);
+}
+
+function hideSuspicious() {
+    const el = document.getElementById('suspicious-indicator');
+    if (!el) return;
+    el.classList.add('hidden');
+    if (suspiciousTimer) { clearTimeout(suspiciousTimer); suspiciousTimer = null; }
+}
+
 function checkWeaponAlarm(hasWeaponAbove50, hasPerson) {
     const now = Date.now();
 
@@ -563,7 +521,10 @@ function checkWeaponAlarm(hasWeaponAbove50, hasPerson) {
         weaponHistory = weaponHistory.filter(t => now - t < ALARM_WINDOW_MS);
 
         if (!alarmActive && weaponHistory.length >= ALARM_COUNT) {
+            hideSuspicious();
             startAlarm();
+        } else if (!alarmActive && weaponHistory.length >= 2) {
+            showSuspicious();
         }
     }
 
@@ -616,6 +577,7 @@ function setMode(mode) {
     detectionMode = mode;
     weaponHistory = [];
     happinessHistory = [];
+    hideSuspicious();
     if (alarmActive) stopAlarm();
     modeBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.mode === mode));
     document.getElementById('alarm-bar').textContent = '🚨 INACTIVO';

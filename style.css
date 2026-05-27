@@ -60,6 +60,32 @@ h1 {
     height: 100%;
 }
 
+.suspicious {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255, 180, 0, 0.9);
+    color: #1a1a00;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    z-index: 25;
+    transition: opacity 0.3s;
+    animation: suspiciousPulse 1.5s infinite alternate;
+    box-shadow: 0 0 12px rgba(255, 180, 0, 0.4);
+}
+
+.suspicious.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes suspiciousPulse {
+    0% { box-shadow: 0 0 6px rgba(255, 180, 0, 0.3); }
+    100% { box-shadow: 0 0 18px rgba(255, 180, 0, 0.7); }
+}
+
 #loading {
     position: absolute;
     top: 0;
@@ -92,6 +118,23 @@ h1 {
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+#progress-container {
+    width: 260px;
+    height: 8px;
+    background: #2a2a3e;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00d2ff, #7b2ff7);
+    border-radius: 6px;
+    transition: width 0.4s ease;
 }
 
 #status {

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CamAI - Detección en Tiempo Real</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.8.6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/facemesh"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <h1>CamAI</h1>
+        <p class="subtitle">Detección de objetos + análisis facial &mdash; cámara o MP4</p>
+
+        <div id="container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+
+            <div id="loading">
+                <div class="spinner"></div>
+                <p id="status">Iniciando...</p>
+            </div>
+        </div>
+
+        <div id="panels">
+            <div class="panel" id="panel-objects">
+                <h3>Objetos detectados</h3>
+                <ul id="detected-objects">
+                    <li class="empty">Esperando...</li>
+                </ul>
+            </div>
+
+            <div class="panel" id="panel-face">
+                <h3>Análisis facial</h3>
+                <div id="face-stats">
+                    <div class="stat">
+                        <span class="label">Ojo izquierdo</span>
+                        <div class="bar-container">
+                            <div id="left-eye-bar" class="bar" style="width:0%"></div>
+                        </div>
+                        <span id="left-eye-val" class="value">0%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Ojo derecho</span>
+                        <div class="bar-container">
+                            <div id="right-eye-bar" class="bar" style="width:0%"></div>
+                        </div>
+                        <span id="right-eye-val" class="value">0%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Boca abierta</span>
+                        <div class="bar-container">
+                            <div id="mouth-bar" class="bar mouth" style="width:0%"></div>
+                        </div>
+                        <span id="mouth-val" class="value">0%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Felicidad</span>
+                        <div class="bar-container">
+                            <div id="happiness-bar" class="bar happiness" style="width:0%"></div>
+                        </div>
+                        <span id="happiness-val" class="value">0%</span>
+                    </div>
+                    <p id="face-count" class="face-count">Rostros detectados: 0</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="controls">
+            <button id="toggle-btn" onclick="toggleDetection()">Pausar</button>
+            <label id="file-label" class="btn">
+                Cargar MP4
+                <input type="file" id="file-input" accept="video/mp4,video/webm,video/ogg" onchange="loadVideo(event)">
+            </label>
+            <span id="source-indicator" class="source-info">📷 Cámara</span>
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="crime" onclick="setMode('crime')">🚨 Crimen</button>
+                <button class="mode-btn" data-mode="happiness" onclick="setMode('happiness')">😊 Felicidad</button>
+            </div>
+            <span id="alarm-bar" class="alarm-indicator">🚨 INACTIVO</span>
+            <label class="conf-label">
+                Confianza mín:
+                <input type="range" id="conf-slider" min="1" max="90" value="15" oninput="setConf(this.value)">
+                <span id="conf-val">15%</span>
+            </label>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
